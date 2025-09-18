@@ -1,0 +1,492 @@
+openapi: 3.0.0
+info:
+  title: TM API Server Requests
+  version: "2.0"
+  description: >
+
+    # Review
+
+    Use the following requests to the TM API Server to get information about the license, get a new license, change a user's password, etc. The given queries allow one to administrate the server or to change a user's password and they are not aimed at performing the text analysis.
+
+
+    # How to make requests?
+
+    All server requests are made to one of the following addresses: <br>
+    
+
+    `http://hostname:port/tmapiserver/` + request endpoint
+    
+    
+    `https://hostname:port/tmapiserver/` + request endpoint
+    
+    # Authentication
+    
+    Authentication is performed with each API request by sending a header with your username and password.
+    
+    <!-- ReDoc-Inject: <security-definitions> -->
+
+servers:
+  - url: https://localhost:7008/tmapiserver/
+
+security:
+  - BasicAuth: []
+
+#==============================
+# paths
+#------------------------------
+paths:
+
+#==============================
+# getting the license
+#------------------------------
+  /license:
+    get:
+      tags:
+        - License and registration information
+      summary: The current license information
+      description: |
+        Use the given request to get the information on the current license.
+      operationId: GetLicense
+      responses:
+        '200':
+          $ref: '#/components/responses/License'
+        '403':
+          $ref: '#/components/responses/AuthenticationError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl -G "http://localhost:7007/tmapiserver/license" ^
+            -H "Authorization: Basic dXNlcjo="
+
+#==============================
+# registration
+#------------------------------
+  /registration:
+    post:
+      tags:
+        - License and registration information
+      summary: Registration of the program
+      description: |
+        Use the given request to register the program. The administrator's rights are needed.
+        
+        *NOTE: If the "changeSignature" parameter is "true", then the signature of the machine will be updated automatically after the registration (in case there was a signature mismatch).*
+        
+      operationId: Registration
+      requestBody:
+        $ref: '#/components/requestBodies/RegistrationParams'
+      responses:
+        '200':
+          $ref: '#/components/responses/License'
+        '403':
+          $ref: '#/components/responses/AuthenticationError'
+        '500':
+          $ref: '#/components/responses/LicenseError'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl "http://localhost:7007/tmapiserver/registration" ^
+            -H "Authorization: Basic dXNlcjo=" ^
+            -d "{\"email\":\"your_email@mail.com.\",\"password\":\"12345678ABC\",\"location\":\"Office\",\"name\":\"Your name\",\"organization\":"\Your organization\" }"
+
+#==============================
+# registration-password (resetting password)
+#------------------------------
+  /registration-password:
+    post:
+      tags:
+        - License and registration information
+      summary: Resetting a user's password
+      description: |
+        Use the given request to reset a user's password in Megaputer licensing system. The administrator’s rights are needed.
+      operationId: ResettingPassword
+      requestBody:
+        $ref: '#/components/requestBodies/ResettingPassword'
+      responses:
+        '200':
+          description: Success
+        '403':
+          $ref: '#/components/responses/AuthenticationError'
+        '500':
+          $ref: '#/components/responses/PasswordError'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl "http://localhost:7007/tmapiserver/registration-password" ^
+            -H "Authorization: Basic dXNlcjo=" ^
+            -d "{ \"email\":\"your_email@mail.com\" }"
+            
+#==============================
+# change-password
+#------------------------------
+  /change-password:
+    post:
+      tags:
+        - User's information
+      summary: Changing a user's password
+      description: |
+        Use the given request to change a user's password. No authorization and administrator’s rights are needed, i.e. any user can change their password. 
+      operationId: ChangePassword
+      requestBody:
+        $ref: '#/components/requestBodies/ChangePassword'
+      responses:
+        '200':
+          description: Success
+        '500':
+          $ref: '#/components/responses/PasswordError'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl "http://localhost:7007/tmapiserver/change-password" ^
+            -H "Authorization: Basic dXNlcjo=" ^
+            -d "{ \"user\":\"your_user_name\",\"oldPassword\":\"12345678ABC\",\"newPassword\":\"ABC12345678\" }"
+
+#==============================
+# registration-signature
+#------------------------------
+  /registration-signature:
+    post:
+      tags:
+        - License and registration information
+      summary: Updating the PC signature
+      description: |
+        Use the given request to update the signature for the current license. The administrator’s rights are needed.
+      operationId: UpdateSignature
+      requestBody:
+        $ref: '#/components/requestBodies/SignatureUpdate'
+      responses:
+        '200':
+          description: Success
+        '403':
+          $ref: '#/components/responses/AuthenticationError'
+        '500':
+          $ref: '#/components/responses/SignatureError'
+      x-codeSamples:
+        - lang: Curl
+          source: |
+            curl "http://localhost:7007/tmapiserver/registration-signature" ^
+            -H "Authorization: Basic dXNlcjo=" ^
+            -d "{ \"email\":\"your_email@mail.com\",\"password\":\"12345678ABC\" }"
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  #============================================================
+  # requestBodies
+  #------------------------------------------------------------
+  requestBodies:
+    #==============================
+    # registration
+    #------------------------------
+    RegistrationParams:
+      required: true
+      description: Registration parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegistrationSchema'
+  
+    #==============================
+    # resetting the password
+    #------------------------------
+    ResettingPassword:
+      required: true
+      description: Resetting the password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegPass'
+    
+    #==============================
+    # changing the password
+    #------------------------------
+    ChangePassword:
+      required: true
+      description: Changing the password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ChangePassword'
+            
+    #==============================
+    # updating the signature
+    #------------------------------
+    SignatureUpdate:
+      required: true
+      description: Updating the signature
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/SignatureUpdate'
+            
+  #============================================================
+  # responses
+  #------------------------------------------------------------
+  responses:
+
+    #==============================
+    # errors
+    #------------------------------
+    AuthenticationError:
+      description: Authentication Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+          example:
+            error:
+              code: 403
+              title: Authorization Required
+              message: You are not logged in to Text Mining API Server.         
+   
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+          example:
+            error:
+              code: 500
+              title: Internal Error
+              message: bad allocation
+    
+    NotEnoughResourcesError:
+      description: Not enough resources
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+          example:
+            error:
+              code: 503
+              title: Service Unavailable
+              message: Not enough resources to complete operation
+              
+    PasswordError:
+      description: Failed to change the password
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+          example:
+            error:
+              code: 500
+              title: "Failed to change the password: Check your input"
+              message: ""
+          
+    SignatureError:
+      description: Failed to change the signature
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+          example:
+            error:
+              code: 500
+              title: "Failed to change the signature: Check your input"
+              message: "" 
+                            
+    LicenseError:
+      description: Failed to create the license
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ServerError'
+          example:
+            error:
+              code: 500
+              title: "Failed to create the license: Check your input"
+              message: ""
+              
+  #==============================
+  # License
+  #------------------------------
+    License:       
+      description: Success
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LicenseInfo'
+              
+  #==============================
+  # Schemas
+  #------------------------------
+  schemas:
+    
+    #==============================
+    # ErrorsSchema
+    #------------------------------
+    ServerError:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: integer
+              description: HTTP status.
+              example: 500
+            title:
+              type: string
+              description: HTTP status description.
+              example: Internal Server Error
+            message:
+              type: string
+              description: Brief description of the problem.
+              example: bad allocation
+          
+    #==============================
+    # LicenseSchema
+    #------------------------------
+    LicenseInfo:
+      type: object
+      properties:
+        regid:
+          $ref: '#/components/schemas/regid'
+        status:
+          $ref: '#/components/schemas/status'
+        statusText:
+          $ref: '#/components/schemas/statusText'
+        licensee:
+          $ref: '#/components/schemas/licensee'
+        organization:
+          $ref: '#/components/schemas/organization'
+        location:
+          $ref: '#/components/schemas/location'
+        serialNumber:
+          $ref: '#/components/schemas/serialNumber'
+        pcSignature:
+          $ref: '#/components/schemas/pcSignature'
+        expirationDate:
+          $ref: '#/components/schemas/expirationDate'
+        expirationDays:
+          $ref: '#/components/schemas/expirationDays'
+   
+    #==============================
+    # RegistrationSchema
+    #------------------------------
+    RegistrationSchema:
+      type: object
+      properties:
+        email: 
+           $ref: '#/components/schemas/email'
+        password:
+           $ref: '#/components/schemas/password'
+        location:
+          $ref: '#/components/schemas/location'
+        name:
+          $ref: '#/components/schemas/licensee'
+        organization:
+          $ref: '#/components/schemas/organization'
+        changeSignature:
+          $ref: '#/components/schemas/changeSignature'
+    
+    #==============================
+    # RegistrationPassword
+    #------------------------------
+    RegPass:
+      type: object
+      properties:
+        email: 
+           $ref: '#/components/schemas/email'
+   
+    #==============================
+    # ChangePassword
+    #------------------------------
+    ChangePassword:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/user'
+        oldPassword:
+          $ref: '#/components/schemas/password'
+        newPassword:
+          $ref: '#/components/schemas/newpassword'
+      
+    #==============================
+    # SignatureUpdate
+    #------------------------------   
+    SignatureUpdate:
+      type: object
+      properties:
+        email:
+          $ref: '#/components/schemas/email'
+        password:
+          $ref: '#/components/schemas/password'
+   
+    #==============================
+    # LicenseInfo
+    #------------------------------
+    regid:
+      type: string
+      description: Registration ID.
+      example: '9968e325-2287-11eb-a8fe-d45d6454a44e'
+    status:
+      type: string
+      description: Status of the license.
+      enum: [
+            "good",
+            "minver",
+            "evaluation",
+            "blocked",
+            "notfound",
+            "badsign",
+            "expired",
+        ]
+      example: 'good'
+    statusText:
+      type: string
+      description: License status description.
+      example: ''
+    licensee:
+      type: string
+      description: The holder of the license.
+      example: 'Owner of the license'
+    user:
+      type: string
+      description: User of the program.
+      example: 'User of the program'
+    organization:
+      type: string
+      description: Organization of the user.
+      example: 'Your organization'
+    changeSignature:
+      type: boolean
+      description: Signature update
+      default: true
+    location:
+      type: string
+      description: Location of the server.
+      example: 'Office'
+    serialNumber:
+      type: integer
+      description: Serial number of the license.
+      example: 101000204
+    pcSignature:
+      type: string
+      description: Signature of the machine.
+      example: '137DAD83E6FBB99A782F'
+    expirationDate:
+      type: string
+      description: Date when the license expires.
+      example: '2021-12-31 00:00:00.000'    
+    expirationDays:
+      type: integer
+      description: Days left till the license expires. A negative value means that the license has expired.
+      example: 43
+    email: 
+      type: string
+      description: Email of the user.
+      example: "your_email@mail.com"
+    password: 
+      type: string
+      description: Current password of the user.
+      example: "12345678ABC"
+    newpassword:
+      type: string
+      description: New password of the user.
+      example: "ABC12345678"
