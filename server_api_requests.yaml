@@ -8,34 +8,30 @@ info:
 
     Use the following requests to the TM API Server to get information about the license, get a new license, change a user's password, etc. The given queries allow one to administrate the server or to change a user's password and they are not aimed at performing the text analysis.
 
-
     # How to make requests?
 
     All server requests are made to one of the following addresses: <br>
-    
+
 
     `http://hostname:port/tmapiserver/` + request endpoint
-    
-    
+
+
     `https://hostname:port/tmapiserver/` + request endpoint
-    
+
     # Authentication
-    
+
     Authentication is performed with each API request by sending a header with your username and password.
     
     <!-- ReDoc-Inject: <security-definitions> -->
 
 servers:
   - url: https://localhost:7008/tmapiserver/
-
 security:
   - BasicAuth: []
-
 #==============================
 # paths
 #------------------------------
 paths:
-
 #==============================
 # getting the license
 #------------------------------
@@ -59,7 +55,6 @@ paths:
           source: |
             curl -G "http://localhost:7007/tmapiserver/license" ^
             -H "Authorization: Basic dXNlcjo="
-
 #==============================
 # registration
 #------------------------------
@@ -70,9 +65,9 @@ paths:
       summary: Registration of the program
       description: |
         Use the given request to register the program. The administrator's rights are needed.
-        
+
         *NOTE: If the "changeSignature" parameter is "true", then the signature of the machine will be updated automatically after the registration (in case there was a signature mismatch).*
-        
+
       operationId: Registration
       requestBody:
         $ref: '#/components/requestBodies/RegistrationParams'
@@ -89,7 +84,6 @@ paths:
             curl "http://localhost:7007/tmapiserver/registration" ^
             -H "Authorization: Basic dXNlcjo=" ^
             -d "{\"email\":\"your_email@mail.com.\",\"password\":\"12345678ABC\",\"location\":\"Office\",\"name\":\"Your name\",\"organization\":"\Your organization\" }"
-
 #==============================
 # registration-password (resetting password)
 #------------------------------
@@ -116,7 +110,6 @@ paths:
             curl "http://localhost:7007/tmapiserver/registration-password" ^
             -H "Authorization: Basic dXNlcjo=" ^
             -d "{ \"email\":\"your_email@mail.com\" }"
-            
 #==============================
 # change-password
 #------------------------------
@@ -141,7 +134,6 @@ paths:
             curl "http://localhost:7007/tmapiserver/change-password" ^
             -H "Authorization: Basic dXNlcjo=" ^
             -d "{ \"user\":\"your_user_name\",\"oldPassword\":\"12345678ABC\",\"newPassword\":\"ABC12345678\" }"
-
 #==============================
 # registration-signature
 #------------------------------
@@ -168,7 +160,6 @@ paths:
             curl "http://localhost:7007/tmapiserver/registration-signature" ^
             -H "Authorization: Basic dXNlcjo=" ^
             -d "{ \"email\":\"your_email@mail.com\",\"password\":\"12345678ABC\" }"
-
 components:
   securitySchemes:
     BasicAuth:
@@ -188,7 +179,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/RegistrationSchema'
-  
     #==============================
     # resetting the password
     #------------------------------
@@ -199,7 +189,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/RegPass'
-    
     #==============================
     # changing the password
     #------------------------------
@@ -210,7 +199,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ChangePassword'
-            
     #==============================
     # updating the signature
     #------------------------------
@@ -221,12 +209,10 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/SignatureUpdate'
-            
   #============================================================
   # responses
   #------------------------------------------------------------
   responses:
-
     #==============================
     # errors
     #------------------------------
@@ -240,8 +226,7 @@ components:
             error:
               code: 403
               title: Authorization Required
-              message: You are not logged in to Text Mining API Server.         
-   
+              message: You are not logged in to Text Mining API Server.
     InternalServerError:
       description: Internal Server Error
       content:
@@ -253,7 +238,6 @@ components:
               code: 500
               title: Internal Error
               message: bad allocation
-    
     NotEnoughResourcesError:
       description: Not enough resources
       content:
@@ -265,7 +249,6 @@ components:
               code: 503
               title: Service Unavailable
               message: Not enough resources to complete operation
-              
     PasswordError:
       description: Failed to change the password
       content:
@@ -277,7 +260,6 @@ components:
               code: 500
               title: "Failed to change the password: Check your input"
               message: ""
-          
     SignatureError:
       description: Failed to change the signature
       content:
@@ -288,8 +270,7 @@ components:
             error:
               code: 500
               title: "Failed to change the signature: Check your input"
-              message: "" 
-                            
+              message: ""
     LicenseError:
       description: Failed to create the license
       content:
@@ -301,22 +282,19 @@ components:
               code: 500
               title: "Failed to create the license: Check your input"
               message: ""
-              
   #==============================
   # License
   #------------------------------
-    License:       
+    License:
       description: Success
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/LicenseInfo'
-              
   #==============================
   # Schemas
   #------------------------------
   schemas:
-    
     #==============================
     # ErrorsSchema
     #------------------------------
@@ -338,7 +316,6 @@ components:
               type: string
               description: Brief description of the problem.
               example: bad allocation
-          
     #==============================
     # LicenseSchema
     #------------------------------
@@ -365,7 +342,6 @@ components:
           $ref: '#/components/schemas/expirationDate'
         expirationDays:
           $ref: '#/components/schemas/expirationDays'
-   
     #==============================
     # RegistrationSchema
     #------------------------------
@@ -384,7 +360,6 @@ components:
           $ref: '#/components/schemas/organization'
         changeSignature:
           $ref: '#/components/schemas/changeSignature'
-    
     #==============================
     # RegistrationPassword
     #------------------------------
@@ -393,7 +368,6 @@ components:
       properties:
         email: 
            $ref: '#/components/schemas/email'
-   
     #==============================
     # ChangePassword
     #------------------------------
@@ -406,10 +380,9 @@ components:
           $ref: '#/components/schemas/password'
         newPassword:
           $ref: '#/components/schemas/newpassword'
-      
     #==============================
     # SignatureUpdate
-    #------------------------------   
+    #------------------------------
     SignatureUpdate:
       type: object
       properties:
@@ -417,7 +390,6 @@ components:
           $ref: '#/components/schemas/email'
         password:
           $ref: '#/components/schemas/password'
-   
     #==============================
     # LicenseInfo
     #------------------------------
@@ -473,7 +445,7 @@ components:
     expirationDate:
       type: string
       description: Date when the license expires.
-      example: '2021-12-31 00:00:00.000'    
+      example: '2021-12-31 00:00:00.000'
     expirationDays:
       type: integer
       description: Days left till the license expires. A negative value means that the license has expired.
